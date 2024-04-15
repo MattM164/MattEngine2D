@@ -26,20 +26,25 @@ vector<string> objectListStrings; //Used for Editor UI
 void ObjectListUpdate(vector<GameObject>& worldObjects);
 
 
+
+
 int main() {
   //Setup
     sf::RenderWindow window(sf::VideoMode(2000, 1200), "Game");
     window.setFramerateLimit(144);
 
     srand(time(NULL)); //Set random seed
-
-   
     
-        //All World Objects
+   
+   
+    //All World Objects
     vector <GameObject> WorldObjects;
-    WorldObjects.reserve(25000);
-    worldGameTex.reserve(500);
-    //std::list <data-type> name_of_list;
+    WorldObjects.reserve(25000); //Set this to a little more than what you think your game will use at max
+    worldGameTex.reserve(1000); //Set this to a little more than what you think your game will use at max
+    
+    vector <GameObject> WorldParticles;
+    WorldParticles.reserve(25000);
+
     list <GameObject> ListdWorldObjects;
 
         //Camera Offset (if the camera moves)
@@ -137,21 +142,29 @@ int main() {
     backGround.numInWorldObjects = 3;
     backGround.worldObjects = &WorldObjects;
 
+    GameObject spawner;
+    spawner.name = "spawner";
+    spawner.Transform.setPosition(500,500);
+    spawner.worldObjects = &WorldObjects;
+
+
 
     WorldObjects.push_back(test);
     WorldObjects.push_back(ground);
     WorldObjects.push_back(ground2);
     WorldObjects.push_back(backGround);
+    WorldObjects.push_back(spawner);
 
     
     WorldObjects[0].AddComponent(new PlayerMoveTest(), &WorldObjects[0]);
+    WorldObjects[0].AddComponent(new SimpleSpriteCollision(), & WorldObjects[0]);
+    WorldObjects[0].AddComponent(new SimplePhysics(), &WorldObjects[0]);
 
-    PlayerMoveTest mytest;
-    mytest.speed = 100;
+    WorldObjects[0].AddComponent(new ChangeSpeed(), &WorldObjects[0]);
 
     //Large Size Testing
     /*
-    for (size_t i = 0; i < 5000; i++)
+    for (size_t i = 0; i < 500; i++)
     {
         GameObject mytester;
         mytester.name = "wowsa";
@@ -401,15 +414,15 @@ int main() {
         }
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            WorldObjects[0].Transform.move(0, -2.5);
+            //WorldObjects[0].Transform.move(0, -2.5);
 
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-            WorldObjects[0].Transform.move(0, 2.5);
+            //WorldObjects[0].Transform.move(0, 2.5);
         }
         //JUMP
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            WorldObjects[0].yVelocity = 100;
+            //WorldObjects[0].yVelocity = 100;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
             WorldObjects[0].Transform.setScale(WorldObjects[0].Transform.getScale().x + 0.01, WorldObjects[0].Transform.getScale().y + 0.01);
@@ -441,7 +454,7 @@ int main() {
         }
 
 
-
+        /*
         //Physics Updates
         //Just doing falling objects right now
         int physlayers = 2;
@@ -463,7 +476,7 @@ int main() {
                         WorldObjects[i].yAcceleration = WorldObjects[i].gravity - (0.5 * 1.2 * WorldObjects[i].yVelocity * WorldObjects[i].yVelocity * WorldObjects[i].dragCo * 0.2) / WorldObjects[i].mass;
                         WorldObjects[i].yVelocity += WorldObjects[i].yAcceleration * deltaTime;
                         WorldObjects[i].Transform.setPosition(WorldObjects[i].Transform.getPosition().x, WorldObjects[i].Transform.getPosition().y * WorldObjects[i].yVelocity * deltaTime);// += velocity * dt;
-                        */
+                        
 
 
 
@@ -493,7 +506,7 @@ int main() {
                         // Update position
                         WorldObjects[i].Transform.setPosition(WorldObjects[i].Transform.getPosition().x + WorldObjects[i].xVelocity * deltaTime, WorldObjects[i].Transform.getPosition().y);//x += velocityX * deltaTime;
                         WorldObjects[i].Transform.setPosition(WorldObjects[i].Transform.getPosition().x, WorldObjects[i].Transform.getPosition().y + WorldObjects[i].yVelocity * deltaTime);//y += velocityY * deltaTime;
-                        */                           
+                                                
 
                         WorldObjects[i].xVelocity *= WorldObjects[i].dragCo;
                     }
@@ -559,7 +572,7 @@ int main() {
                                     //WorldObjects[i].xVelocity = -WorldObjects[i].xVelocity * WorldObjects[i].bounciness;
                                     //WorldObjects[i].yVelocity = 0;
                                     WorldObjects[i].Transform.setPosition(WorldObjects[i].Transform.getPosition().x, lastPos.y);
-                                    */
+                                    
 
                                     
                                 }
@@ -572,7 +585,7 @@ int main() {
 
         }
 
-
+        */
         //ImGui Editor Windows/////////////
         if (editor) {
 
@@ -609,7 +622,19 @@ int main() {
                 {
                     if (ImGui::MenuItem("Create New"))
                     {
-                        //Do something
+                        GameObject mynewobj("DefaultSprite.png");
+                        mynewobj.name = "New Object";
+                        mynewobj.renderLayer = mouseLayer;
+                        mynewobj.myTexture = "DefaultSprite.png";
+                        mynewobj.numInWorldObjects = WorldObjects.size();
+                        mynewobj.position = Camera.getCenter();
+                        mynewobj.Transform.setPosition(Camera.getCenter());
+                        mynewobj.worldObjects = &WorldObjects;
+                        WorldObjects.push_back(mynewobj);
+                        WorldObjects[mynewobj.numInWorldObjects].Setup();
+                        ObjectListUpdate(WorldObjects);
+                        selectedObject = &WorldObjects.back();
+                        objectSelected = true;
                     }
                     ImGui::EndMenu();
                 }

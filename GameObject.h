@@ -6,6 +6,8 @@
 #include <vector>
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include <time.h>
+#include <chrono>
 
 using namespace std;
 vector<sf::Texture> worldGameTex;
@@ -176,7 +178,7 @@ public:
 		//Will run every frame
 
 		//Exmaple of how to access GameObject
-		myObject->Transform.move(7, 0);
+		//dynamic_cast<ComponentName*>(WorldObjects[ObjectIndex].components[ComponentIndex])->speed = 700;
 	}
 
 };
@@ -186,7 +188,7 @@ public:
 	PlayerMoveTest() : Component() {}
 	string compName = "PlayerMoveTest";
 
-	float speed = 5;
+	float speed = 1;
 
 	//myObject is a pointer to the object this component is attached to
 	void Start() override {
@@ -200,15 +202,23 @@ public:
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 			myObject->xVelocity += -speed;
+			//myObject->Transform.move(2.5, 0);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 			myObject->xVelocity += speed;
+			//myObject->Transform.move(-2.5, 0);
 		}
-
-	}
-
-	void setSpeed(float newSpeed) {
-		speed = newSpeed;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+			myObject->Transform.move(0, -2.5);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			myObject->Transform.move(0, 2.5);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+			myObject->Transform.setPosition(myObject->Transform.getPosition().x, myObject->Transform.getPosition().y - 1);
+			myObject->yVelocity = 100;
+		}
+		cout << myObject->yVelocity << endl;
 	}
 
 	//Used for adding info to Inspector window in editor mode
@@ -218,6 +228,203 @@ public:
 	}
 
 };
+
+
+class ChangeSpeed : public Component {
+public:
+	ChangeSpeed() : Component() {}
+	string compName = "ChangeSpeed";
+
+	float fastSpeed = 50;
+	float slowSpeed = 5;
+
+	//myObject is a pointer to the object this component is attached to
+	void Start() override {
+		//Will run once at the start
+	}
+	void Update() override {
+		//Will run every frame
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) {
+			dynamic_cast<PlayerMoveTest*>(myObject->components[0])->speed = fastSpeed;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {
+			dynamic_cast<PlayerMoveTest*>(myObject->components[0])->speed = slowSpeed;
+		}
+	}
+
+	void EditorUI() override {
+		ImGui::InputFloat("Fast Speed", &fastSpeed, 0.5, 1, "%.2f");
+		ImGui::InputFloat("Slow Speed", &slowSpeed, 0.5, 1, "%.2f");
+
+	}
+
+
+};
+
+class SimpleSpriteCollision : public Component {
+public:
+	SimpleSpriteCollision() : Component(){}
+	string compName = "SimpleSpriteCollision";
+
+	//Variables
+
+	bool usePhysics = true;
+
+	sf::Vector2f prevPos;
+
+	sf::Transform sprite1;
+	sf::Transform sprite2;
+
+
+	void Start() override {
+		//Will run once at the start
+	}
+	void Update() override {
+		//Will run every frame
+		for (size_t i = 0; i < myObject->worldObjects->size(); i++)
+		{
+			
+
+			if (i != myObject->numInWorldObjects && myObject->physicsLayer == myObject->worldObjects->at(i).physicsLayer && myObject->worldObjects->at(i).Transform.getGlobalBounds().intersects(myObject->Transform.getGlobalBounds())) {
+				
+				sf::FloatRect overlap;
+				myObject->worldObjects->at(i).Transform.getGlobalBounds().intersects(myObject->Transform.getGlobalBounds(), overlap);//    myObject->worldObjects->at(i).Transform.getGlobalBounds().intersects(myObject->Transform.getGlobalBounds());
+		
+				 // Calculate center of the overlap
+				sf::Vector2f overlapCenter(overlap.left + overlap.width / 2, overlap.top + overlap.height / 2);
+
+				// Calculate direction vector from sprite2 to the center of the overlap
+				sf::Vector2f directionVector = overlapCenter - myObject->Transform.getPosition();
+
+				// Normalize direction vector
+				float length = std::sqrt(directionVector.x * directionVector.x + directionVector.y * directionVector.y);
+				if (length != 0) {
+					directionVector /= length;
+				}
+				
+				//BASIC
+				if (!usePhysics) {
+					if (directionVector.x > 0) {
+						if (abs(directionVector.x) > abs(directionVector.y)) {
+							//cout << "Right" << endl;
+							myObject->Transform.setPosition(prevPos.x, myObject->Transform.getPosition().y);
+						}
+					}
+					if (directionVector.x < 0) {
+						if (abs(directionVector.x) > abs(directionVector.y)) {
+							//cout << "Left" << endl;
+							myObject->Transform.setPosition(prevPos.x, myObject->Transform.getPosition().y);
+						}
+					}
+					if (directionVector.y > 0) {
+						if (abs(directionVector.x) < abs(directionVector.y)) {
+							//cout << "Top" << endl;
+							myObject->Transform.setPosition(myObject->Transform.getPosition().x, prevPos.y);
+						}
+					}
+					if (directionVector.y < 0) {
+						if (abs(directionVector.x) < abs(directionVector.y)) {
+							//cout << "Bottom" << endl;
+							myObject->Transform.setPosition(myObject->Transform.getPosition().x, prevPos.y);
+						}
+					}
+				}
+				//PHYSICS
+				else {
+					if (directionVector.x > 0) {
+						if (abs(directionVector.x) > abs(directionVector.y)) {
+							//cout << "Right" << endl;
+							myObject->Transform.setPosition(prevPos.x, myObject->Transform.getPosition().y);
+							myObject->xVelocity = -myObject->xVelocity * myObject->bounciness;
+						}
+					}
+					if (directionVector.x < 0) {
+						if (abs(directionVector.x) > abs(directionVector.y)) {
+							//cout << "Left" << endl;
+							myObject->Transform.setPosition(prevPos.x, myObject->Transform.getPosition().y);
+							myObject->xVelocity = -myObject->xVelocity * myObject->bounciness;
+						}
+					}
+					if (directionVector.y > 0) {
+						if (abs(directionVector.x) < abs(directionVector.y)) {
+							//cout << "Top" << endl;
+							myObject->Transform.setPosition(myObject->Transform.getPosition().x, prevPos.y);
+							myObject->yVelocity = -myObject->yVelocity * myObject->bounciness;
+						}
+					}
+					if (directionVector.y < 0) {
+						if (abs(directionVector.x) < abs(directionVector.y)) {
+							//cout << "Bottom" << endl;
+							myObject->Transform.setPosition(myObject->Transform.getPosition().x, prevPos.y);
+							myObject->yVelocity = -myObject->yVelocity * myObject->bounciness;
+						}
+					}
+				}
+
+			
+
+				//Super Simple:
+				/*
+				cout << "Colliding with " << myObject->worldObjects->at(i).name << "  -  " << prevPos.x << endl;
+				myObject->Transform.setPosition(prevPos);
+				*/
+				
+			}
+			else {
+				//cout << "Colliding with Nothing" << endl;
+			}
+		}
+		prevPos = myObject->Transform.getPosition();
+	}
+
+
+};
+
+class SimplePhysics : public Component {
+public:
+	SimplePhysics() : Component() {}
+	string compName = "SimplePhysics";
+
+	float gravity = -9.81;
+	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point end;
+	std::chrono::duration<int, std::milli> timeElapsed;
+
+	//myObject is a pointer to the object this component is attached to
+	void Start() override {
+		//Will run once at the start
+	}
+	void Update() override {
+		//Will run every frame
+
+		float deltaTime = 0.16666; //Timestep, set to 60 fps.  144fps is 0.0694444
+		end = std::chrono::steady_clock::now(); // Get current time
+	   // Calculate time elapsed since start
+		timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		if (timeElapsed >= std::chrono::milliseconds(1000 / 60)) { //Check if it's time to update physics //60fps
+			float currentYpos = myObject->Transform.getPosition().y;
+			myObject->yVelocity += myObject->yAcceleration * deltaTime;// *WorldObjects[i].dragCo; //Updates Velocity, including drag co: might not be working
+			myObject->Transform.setPosition(myObject->Transform.getPosition().x, currentYpos -= myObject->yVelocity * deltaTime); //Updates position
+
+			float currentXpos = myObject->Transform.getPosition().x;
+			myObject->xVelocity += myObject->xAcceleration * deltaTime;// *WorldObjects[i].dragCo; //Updates Velocity, including drag co: might not be working
+			myObject->Transform.setPosition(currentXpos -= myObject->xVelocity * deltaTime, myObject->Transform.getPosition().y); //Updates position
+		}
+
+	}
+
+
+};
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -164,6 +164,7 @@
     <ClInclude Include="Components.h" />
     <ClInclude Include="EditorMouse.h" />
     <ClInclude Include="EditorUI.h" />
+    <ClInclude Include="GameLoop.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="HelperFuncs.h" />
     <ClInclude Include="imgui\imconfig-SFML.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="OpenFileExplorer.h" />
     <ClInclude Include="SaveLoadScene.h" />
+    <ClInclude Include="textureObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

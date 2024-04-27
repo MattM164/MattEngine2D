@@ -8,9 +8,12 @@
 #include "imgui-SFML.h"
 #include <time.h>
 #include <chrono>
+#include <map>
+#include <functional>
+#include "textureObject.h"
 
 using namespace std;
-vector<sf::Texture> worldGameTex;
+vector<texObject> worldGameTex;
 class GameObject;
 
 class Component {
@@ -24,6 +27,9 @@ public:
 		myObject = thisObject;
 	}
 	virtual void EditorUI() {}
+	virtual string returnName() {
+		return compName;
+	}
 };
 
 class GameObject {
@@ -33,10 +39,14 @@ public:
 	string name = "";
 	sf::Sprite Transform;
 	sf::Texture texture;
+	int textureIndex = 0;
 	int renderLayer = 0;
 	int numInWorldObjects = 0;
 	vector<Component*> components; //List of all attached Components
 	vector<GameObject>* worldObjects;
+
+	//Save to file
+	bool saveToFile = true;
 
 	//Properties - Only for initiation, do not change at runtime
 	sf::Vector2f position = sf::Vector2f(0, 0);
@@ -44,7 +54,7 @@ public:
 	sf::Vector2f origin = sf::Vector2f(0,0);
 	sf::Color objColor = sf::Color();
 	float rotation = 0;
-	string myTexture = "";
+	string myTexture = " ";
 
 	//Physics
 	bool usePhysics = false;
@@ -87,6 +97,11 @@ public:
 
 		Setup();
 	}
+	GameObject(int texindex) {
+		
+		textureIndex = texindex;
+		Setup();
+	}
 
 	/*
 	~GameObject() {
@@ -102,7 +117,8 @@ public:
 		Transform.setScale(scale);
 		//Add In Texture
 
-		LoadNewTexture(myTexture);
+		//LoadNewTexture(myTexture);
+		SetObjectTexture(textureIndex);
 
 		//Set Origin to middle of texture (by default...)
 		//Transform.setOrigin((sf::Vector2f)texture.getSize() / 2.f);
@@ -112,28 +128,63 @@ public:
 	void LoadNewTexture(string newtex) {
 		//Add In Texture
 		//sf::Texture loadedtexture;
-		if (!texture.loadFromFile(newtex))
-		{
+		//if (!texture.loadFromFile(newtex))
+		//{
 			// error
-			cout << "Error loading new Texture for: " << name << " Object" << endl;
-		}
+		//	cout << "Error loading new Texture for: " << name << " Object" << endl;
+		//}
 		//sf::IntRect newrect(sf::IntRect(0, 0, texture.getSize().x, texture.getSize().y)); //NEEDS WORK
 		//Transform.setTextureRect(newrect);
 		//Need to fix how it places the texture/set the rect///////////////
 		//Transform.setOrigin((sf::Vector2f)texture.getSize() / 2.f);
 		//texture = loadedtexture;
 
-		worldGameTex.push_back(texture);
+
+		texObject loadedTex;
+		loadedTex.myFileName = newtex;
+
+		if (!loadedTex.texture.loadFromFile(newtex))
+		{
+			// error
+			cout << "Error loading new Texture for: " << name << " Object" << endl;
+		}
+
+		worldGameTex.push_back(loadedTex);
 		
-		Transform.setTexture(worldGameTex.back());
-		Transform.setOrigin((sf::Vector2f)texture.getSize() / 2.f);
+		Transform.setTexture(worldGameTex.back().texture);
+		textureIndex = worldGameTex.size() - 1;
+		sf::IntRect newrect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(worldGameTex.back().texture.getSize().x, worldGameTex.back().texture.getSize().y)));
+		Transform.setTextureRect(newrect);
+		Transform.setOrigin((sf::Vector2f)worldGameTex.back().texture.getSize() / 2.0f);
+		//Transform.setOrigin(sf::Vector2f(worldGameTex.back().texture.getSize().x / 2.0f, worldGameTex.back().texture.getSize().y / 2.0f));
+		//Transform.setOrigin((sf::Vector2f)texture.getSize() / 2.f);
+		//Transform.setTextureRect(newrect);
 		hitBox = Transform.getGlobalBounds();
 		//Transform.setTextureRect(texture.);
+	}
+	
+	void SetObjectTexture(int index) {
+		//Set texture from the worldtex vector
+		Transform.setTexture(worldGameTex[index].texture);
+		textureIndex = index;
+		//Transform.setOrigin((sf::Vector2f)worldGameTex[index].texture.getSize() / 2.f);
+		//hitBox = sf::Vector2f(Transform.getGlobalBounds().getSize().x / 2.0f, );
+		//hitBox = Transform.getLocalBounds();
+
+		//Transform.setOrigin(sf::Vector2f(worldGameTex[index].texture.getSize().x / 2.0f, worldGameTex[index].texture.getSize().y / 2.0f));
+	
+		sf::IntRect newrect(sf::IntRect(sf::Vector2i(0,0), sf::Vector2i(worldGameTex[index].texture.getSize().x, worldGameTex[index].texture.getSize().y)));
+		Transform.setTextureRect(newrect);
+		Transform.setOrigin((sf::Vector2f)worldGameTex[index].texture.getSize() / 2.0f);
+		hitBox = Transform.getGlobalBounds();
+	
 	}
 
 	void AddComponent(Component *mycomponent, GameObject *tempObj) {
 		components.push_back(mycomponent);
-		components.back()->setGameObject(tempObj);
+		if (tempObj != NULL) {
+			components.back()->setGameObject(tempObj);
+		}
 	}
 
 	Component* GetComponent(string name) {
@@ -164,11 +215,22 @@ public:
 };
 
 
+
+
+
+
+
+//To make a component, copy and paste the template below.  Change the three instances of 'MyComponent'
+// to the name of your component. Then, duplicate a line from the map at the bottom of the GameObject.h file
+// and replace the name of the class to your new class name.  You may need to declare the name of the component
+// at the top of this file to access it from below.
+
+
 //Template
 class MyComponent : public Component {
 public:
 	MyComponent() : Component() {}
-	string compName = "PlayerMoveTest";
+	string compName = "MyComponent";
 
 	//myObject is a pointer to the object this component is attached to
 	void Start() override {
@@ -179,6 +241,10 @@ public:
 
 		//Exmaple of how to access GameObject
 		//dynamic_cast<ComponentName*>(WorldObjects[ObjectIndex].components[ComponentIndex])->speed = 700;
+	}
+
+	string returnName() {
+		return compName;
 	}
 
 };
@@ -218,7 +284,11 @@ public:
 			myObject->Transform.setPosition(myObject->Transform.getPosition().x, myObject->Transform.getPosition().y - 1);
 			myObject->yVelocity = 100;
 		}
-		cout << myObject->yVelocity << endl;
+
+	}
+
+	string returnName() {
+		return compName;
 	}
 
 	//Used for adding info to Inspector window in editor mode
@@ -252,6 +322,10 @@ public:
 		}
 	}
 
+	string returnName() {
+		return compName;
+	}
+
 	void EditorUI() override {
 		ImGui::InputFloat("Fast Speed", &fastSpeed, 0.5, 1, "%.2f");
 		ImGui::InputFloat("Slow Speed", &slowSpeed, 0.5, 1, "%.2f");
@@ -267,6 +341,8 @@ public:
 	string compName = "SimpleSpriteCollision";
 
 	//Variables
+	bool isColliding = false;
+	GameObject* collidingWith = NULL;
 
 	bool usePhysics = true;
 
@@ -286,7 +362,7 @@ public:
 			
 
 			if (i != myObject->numInWorldObjects && myObject->physicsLayer == myObject->worldObjects->at(i).physicsLayer && myObject->worldObjects->at(i).Transform.getGlobalBounds().intersects(myObject->Transform.getGlobalBounds())) {
-				
+				isColliding = true;
 				sf::FloatRect overlap;
 				myObject->worldObjects->at(i).Transform.getGlobalBounds().intersects(myObject->Transform.getGlobalBounds(), overlap);//    myObject->worldObjects->at(i).Transform.getGlobalBounds().intersects(myObject->Transform.getGlobalBounds());
 		
@@ -360,7 +436,7 @@ public:
 						}
 					}
 				}
-
+				collidingWith = &myObject->worldObjects->at(i);
 			
 
 				//Super Simple:
@@ -372,9 +448,17 @@ public:
 			}
 			else {
 				//cout << "Colliding with Nothing" << endl;
+				isColliding = false;
+				collidingWith = NULL;
 			}
 		}
 		prevPos = myObject->Transform.getPosition();
+
+
+	}
+
+	string returnName() {
+		return compName;
 	}
 
 
@@ -412,6 +496,9 @@ public:
 		}
 
 	}
+	string returnName() {
+		return compName;
+	}
 
 
 };
@@ -435,4 +522,34 @@ GameObject* FindGameObject(string search, vector<GameObject>* worldObjects) {
 			return &worldObjects->at(i);
 		}
 	}
+}
+
+
+std::map<std::string, std::function<Component* ()>> classFactory = {
+	//{"ComponentName", []() { return new ComponentName(); }},
+	{"PlayerMoveTest", []() { return new PlayerMoveTest(); }},
+	{"SimplePhysics", []() { return new SimplePhysics(); }},
+	{"SimpleSpriteCollision", []() { return new SimpleSpriteCollision(); }},
+	{"ChangeSpeed", []() { return new ChangeSpeed(); }},
+	
+};
+
+Component* CreateComponent(const std::string& className) {
+	if (classFactory.find(className) != classFactory.end()) {
+		return classFactory[className]();
+	}
+	return nullptr;
+}
+
+void CreateTexture(string newtex) {
+	sf::Texture mytexture;
+		if (!mytexture.loadFromFile(newtex))
+		{
+			// error
+			cout << "Error loading new Texture" << endl;
+		}
+		texObject newtexture;
+		newtexture.myFileName = newtex;
+		newtexture.texture = mytexture;
+		worldGameTex.push_back(newtexture);
 }

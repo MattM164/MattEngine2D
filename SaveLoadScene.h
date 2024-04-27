@@ -17,27 +17,60 @@ void SaveScene(std::vector<GameObject>& objects, string filename) {
         //Meta Data
         //Scene Name
         outputFile << filename << endl;
+		//Num of Objects
+		outputFile << objects.size() << endl;
 
         //Objects
         for (size_t i = 0; i < objects.size(); i++)
         {
-            //Name
-            outputFile << objects[i].name << "*";\
-            //Position
-            outputFile << objects[i].Transform.getPosition().x << "*" << objects[i].Transform.getPosition().y << "*";
-            //Scale
-            outputFile << objects[i].Transform.getScale().x << "*" << objects[i].Transform.getScale().y << "*";
-            //Texture
-            outputFile << objects[i].myTexture << "*";
-			//RenderLayer
-			outputFile << objects[i].renderLayer << "*";
+			if (objects[i].saveToFile) {
+				//Name
+				outputFile << objects[i].name << "*"; \
+				//Position
+				outputFile << objects[i].Transform.getPosition().x << "*" << objects[i].Transform.getPosition().y << "*";
+				//Scale
+				outputFile << objects[i].Transform.getScale().x << "*" << objects[i].Transform.getScale().y << "*";
+				//Texture
+				outputFile << objects[i].myTexture << "*";
+				//RenderLayer
+				outputFile << objects[i].renderLayer << "*";
+				//Physics Layer
+				outputFile << objects[i].physicsLayer << "*";
+				//Texture index
+				outputFile << objects[i].textureIndex << "*";
 
 
-			if (i != objects.size() - 1) {
-				outputFile << endl;
+
+				//Save Components
+				//Num of components
+				outputFile << objects[i].components.size() << "*";
+				//Save names that we will compare to map later
+				for (size_t k = 0; k < objects[i].components.size(); k++)
+				{
+					outputFile << objects[i].components[k]->returnName() << " ";
+					//cout << objects[i].components[k]->returnName() << endl;
+				}
+				
+				//outputFile << "*";
+
+				if (i != objects.size() - 1) {
+					outputFile << endl;
+				}
 			}
             
         }
+
+
+		//Save all Textures and their indecies!
+		outputFile << endl;
+		//How many textures
+		outputFile << worldGameTex.size() << "%";
+		for (size_t i = 0; i < worldGameTex.size(); i++)
+		{
+			outputFile << worldGameTex[i].myFileName << "%";
+		}
+
+
 		//outputFile << endl;
 		outputFile.close();
     }
@@ -46,13 +79,24 @@ void SaveScene(std::vector<GameObject>& objects, string filename) {
 //vector<GameObject> LoadScene(string filename) {
 void LoadScene(string filename, vector<GameObject> &gameObjects) {
 	filename = filename + ".scene";
+	worldGameTex.clear();
 	string sceneData = "";
 	int objectnum = 0;
+	int numOfObjects = 0;
     ifstream inputFile(filename);
     if (inputFile.is_open()) {
 		//GetSceneName
 		getline(inputFile, sceneData);
-		while (inputFile) {
+		//Get Object Count
+		getline(inputFile, sceneData);
+		string lobjectscount = sceneData;
+		numOfObjects = stoi(lobjectscount);
+		cout << "NUMBER OF OBJECTS: " << numOfObjects << endl;
+		for (size_t i = 0; i < numOfObjects; i++)
+		{
+
+		
+		//while (inputFile) {
 			//name
 			string lname;
 			getline(inputFile, sceneData, '*');
@@ -75,8 +119,42 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 			string lrenderlayer;
 			getline(inputFile, sceneData, '*');
 			lrenderlayer = sceneData;
+			string lphysicslayer;
+			getline(inputFile, sceneData, '*');
+			lphysicslayer = sceneData;
+			string ltextureindex;
+			getline(inputFile, sceneData, '*');
+			ltextureindex = sceneData;
+
+
 
 			GameObject loadedGameObject(ltexture);
+
+			//Components////////////////////////////////////////////
+
+			//Get number of components
+			string numComponents;
+			getline(inputFile, sceneData, '*');
+			numComponents = sceneData; //stoi
+			//get the names into a vector
+			vector<string> compNames;
+			for (size_t i = 0; i < stoi(numComponents); i++)
+			{
+				getline(inputFile, sceneData, ' ');
+				compNames.push_back(sceneData);
+				cout << sceneData << endl;
+			}
+
+			
+			//getline(inputFile, sceneData, '\n');
+
+
+
+
+			
+			//WorldObjects[0].AddComponent(CreateComponent("PlayerMoveTest"), &WorldObjects[0]);
+			//////////////////////////////
+			
 			loadedGameObject.name = lname;
 			loadedGameObject.position.x = stof(lposx);
 			loadedGameObject.position.y = stof(lposy);
@@ -85,9 +163,27 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 			loadedGameObject.myTexture = ltexture;
 			loadedGameObject.numInWorldObjects = objectnum;
 			loadedGameObject.renderLayer = stoi(lrenderlayer);
+			loadedGameObject.physicsLayer = stoi(lphysicslayer);
+			loadedGameObject.textureIndex = stoi(ltextureindex);
+
+			loadedGameObject.worldObjects = &gameObjects;
 			//loadedGameObject.Setup();
-			
+
+
 			gameObjects.push_back(loadedGameObject);
+
+			if (compNames.size() > 0) {
+				for (size_t i = 0; i < compNames.size(); i++)
+				{
+					gameObjects.back().AddComponent(CreateComponent(compNames[i]), &gameObjects.back());
+					cout << gameObjects.back().components[i]->returnName() << endl;
+				}
+			}
+			else {
+				//getline(inputFile, sceneData, '*');
+			}
+
+
 			cout << "name: " << loadedGameObject.name << endl;
 			cout << "x: " << loadedGameObject.position.x << endl;
 			cout << "y: " << loadedGameObject.position.y << endl;
@@ -98,14 +194,47 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 			if (getline(inputFile, sceneData, '\n')) {
 				cout << "got that last backslash n" << endl;
 			}
+			//getline(inputFile, sceneData, '\n');
 			
 
 			
 		}
+
+
+		//Textures/////////////////////////////
+	//num of textures
+		int numTex;
+		getline(inputFile, sceneData, '%');
+		numTex = stoi(sceneData); //stoi
+		vector<string> texNames;
+		cout << numTex << endl;
+		//get file names
+		for (size_t i = 0; i < numTex; i++)
+		{
+			getline(inputFile, sceneData, '%');
+			texNames.push_back(sceneData);
+		}
+
+		//get textures in list
+		for (size_t i = 0; i < texNames.size(); i++)
+		{
+			CreateTexture(texNames[i]);
+		}
+		for (size_t i = 0; i < gameObjects.size(); i++)
+		{
+			gameObjects[i].Setup();
+		}
+
+
+
+
 	}
 	else {
 		
 	}
+
+		
+
 	//cout << "Done reading file" << endl;
 	getline(inputFile, sceneData, '\n');
 	inputFile.close();

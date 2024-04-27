@@ -1,9 +1,8 @@
 TestSave.scene
-PlayerBall*327*849.956*1*1*ball.png*0*
-Ground*800*1100*17*2*MetalGround.png*1*
-Ground2*1900*700*17*2*MetalGround.png*1*
-sky*0*0*10*10*skycolor.png*2*
-New Object*1002*949.854*1*1*DefaultSprite.png*0*
-New Object*715*949.908*1*1*DefaultSprite.png*0*
-New Object*604*949.98*1*1*DefaultSprite.png*0*
-New Object*862*949.913*1*1*DefaultSprite.png*0*
+5
+PlayerBall*1210*450.21*1*1* *0*0*0*4*PlayerMoveTest SimpleSpriteCollision SimplePhysics ChangeSpeed 
+Ground*800*1100*17*2* *1*0*1*0*
+Ground2*1900*700*17*2* *1*0*1*0*
+sky*0*0*10*10* *2*1*3*0*
+spawner*874*950.092*1*1* *0*0*2*4*PlayerMoveTest SimpleSpriteCollision SimplePhysics ChangeSpeed 
+4%ball.png%MetalGround.png%DefaultSprite.png%skycolor.png%

@@ -12,6 +12,7 @@
 #include <thread>
 #include <cmath>
 #include "SaveLoadScene.h"
+#include "GameLoop.h"
 
 //ImGui Libraries
 #include "imgui.h"
@@ -25,6 +26,8 @@ using namespace std;
 vector<string> objectListStrings; //Used for Editor UI
 void ObjectListUpdate(vector<GameObject>& worldObjects);
 
+//The Camera
+sf::View Camera;
 
 
 
@@ -35,7 +38,33 @@ int main() {
 
     srand(time(NULL)); //Set random seed
     
-   
+    sf::Texture testex;
+    testex.loadFromFile("ball.png");
+    texObject mytester;
+    mytester.myFileName = "ball.png";
+    mytester.texture = testex;
+    worldGameTex.push_back(mytester);
+
+    sf::Texture testex2;
+    testex2.loadFromFile("MetalGround.png");
+    texObject mytester2;
+    mytester2.myFileName = "MetalGround.png";
+    mytester2.texture = testex2;
+    worldGameTex.push_back(mytester2);
+
+    sf::Texture testex3;
+    testex3.loadFromFile("DefaultSprite.png");
+    texObject mytester3;
+    mytester3.myFileName = "DefaultSprite.png";
+    mytester3.texture = testex3;
+    worldGameTex.push_back(mytester3);
+
+    sf::Texture testex4;
+    testex4.loadFromFile("skycolor.png");
+    texObject mytester4;
+    mytester4.myFileName = "skycolor.png";
+    mytester4.texture = testex4;
+    worldGameTex.push_back(mytester4);
    
     //All World Objects
     vector <GameObject> WorldObjects;
@@ -49,7 +78,7 @@ int main() {
 
         //Camera Offset (if the camera moves)
     sf::Vector2f camOffset = sf::Vector2f(0.0,0.0);
-    sf::View Camera = window.getDefaultView();
+    Camera = window.getDefaultView();
     sf::Vector2f cameraOffset;
             //Any mouse position calculations need to take into account the camera offset
     Camera.setCenter(700,600);
@@ -83,6 +112,8 @@ int main() {
     bool evntAlready = false;
     bool midMouse = false;
     sf::Vector2i midMouseInit = sf::Vector2i(0, 0);
+    bool selectingNewImage = false;
+    bool selectingNewComponent = false;
     
     
 
@@ -101,7 +132,7 @@ int main() {
     
    
 
-    GameObject test("ball.png");
+    GameObject test(0);
     //GameObject test;
     //test.LoadNewTexture("ball.png");
     test.name = "PlayerBall";
@@ -114,7 +145,7 @@ int main() {
     
 
 
-    GameObject ground("MetalGround.png");
+    GameObject ground(1);
     ground.name = "Ground";
     ground.renderLayer = 1;
     ground.Transform.setScale(17,2);
@@ -123,7 +154,7 @@ int main() {
     ground.numInWorldObjects = 1;
     ground.worldObjects = &WorldObjects;
 
-    GameObject ground2("MetalGround.png");
+    GameObject ground2(1);
     ground2.name = "Ground2";
     //ground2.Transform.setColor(sf::Color(255,255,255,150));
     ground2.renderLayer = 1;
@@ -134,7 +165,7 @@ int main() {
     ground2.worldObjects = &WorldObjects;
 
 
-    GameObject backGround("skycolor.png");
+    GameObject backGround(3);
     backGround.name = "sky";
     backGround.renderLayer = 2;
     backGround.Transform.setScale(sf::Vector2f(10,10));
@@ -142,10 +173,13 @@ int main() {
     backGround.numInWorldObjects = 3;
     backGround.worldObjects = &WorldObjects;
 
-    GameObject spawner;
+    GameObject spawner(2);
     spawner.name = "spawner";
+    spawner.usePhysics = true;
+    spawner.collisions = true;
     spawner.Transform.setPosition(500,500);
     spawner.worldObjects = &WorldObjects;
+    spawner.numInWorldObjects = 4;
 
 
 
@@ -156,11 +190,17 @@ int main() {
     WorldObjects.push_back(spawner);
 
     
-    WorldObjects[0].AddComponent(new PlayerMoveTest(), &WorldObjects[0]);
+    //WorldObjects[0].AddComponent(new PlayerMoveTest(), &WorldObjects[0]);
+    WorldObjects[0].AddComponent(CreateComponent("PlayerMoveTest"), &WorldObjects[0]);
     WorldObjects[0].AddComponent(new SimpleSpriteCollision(), & WorldObjects[0]);
     WorldObjects[0].AddComponent(new SimplePhysics(), &WorldObjects[0]);
 
     WorldObjects[0].AddComponent(new ChangeSpeed(), &WorldObjects[0]);
+
+    WorldObjects[4].AddComponent(CreateComponent("PlayerMoveTest"), &WorldObjects[4]);
+    WorldObjects[4].AddComponent(CreateComponent("SimpleSpriteCollision"), &WorldObjects[4]);
+    WorldObjects[4].AddComponent(CreateComponent("SimplePhysics"), &WorldObjects[4]);
+    WorldObjects[4].AddComponent(CreateComponent("ChangeSpeed"), &WorldObjects[4]);
 
     //Large Size Testing
     /*
@@ -178,7 +218,11 @@ int main() {
     //PlayerMoveTest* hmmm = &WorldObjects[0].components[0];
     //cout << bruh.GetComponent("PlayerMoveTest")->compName << endl;;
 
+
+    
     /////////////////
+
+    Start();
 
     //Fonts
     sf::Font font;
@@ -189,7 +233,7 @@ int main() {
     sf::Text text;
     text.setPosition(window.getSize().x/2,window.getSize().y/2);
     text.setFont(font);
-    text.setString("");
+    text.setString("testing");
     text.setCharacterSize(75);
     text.setFillColor(sf::Color::White);
 
@@ -203,11 +247,19 @@ int main() {
         WorldObjects[i].ComponentsStart();
     }
 
+    //Setup mouse collision detection sprite
+    sf::Texture mousecoltex;
+    mousecoltex.loadFromFile("MouseCollisionSprite.png");
+    mouseCollision.Transform.setTexture(mousecoltex);
+    sf::IntRect newmouserect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(mousecoltex.getSize().x, mousecoltex.getSize().y)));
+    mouseCollision.Transform.setTextureRect(newmouserect);
+    mouseCollision.Transform.setOrigin((sf::Vector2f)mousecoltex.getSize() / 2.0f);
+    mouseCollision.hitBox = mouseCollision.Transform.getGlobalBounds();
+
 
   // -Main loop-
 
     while (window.isOpen()) {
-
         // Clear the window
         window.clear();
 
@@ -230,6 +282,7 @@ int main() {
                 window.close();
             }else if (event.type == sf::Event::MouseWheelScrolled) {  //Scroll wheel changing the layer
                 if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+                    
                     if (event.mouseWheelScroll.delta > 0) {
                         // Scroll up, increase the value
                         mouseLayer++;
@@ -257,7 +310,9 @@ int main() {
 
 
 
+
         //Editor
+
         if (!sf::Mouse().isButtonPressed(sf::Mouse().Left)) { 
             holdingLeftMouse = false; 
             gotMouseObjectOffset = false;
@@ -281,6 +336,8 @@ int main() {
             }
             if (sf::Mouse().isButtonPressed(sf::Mouse().Left) && hoveredObject != NULL && objectSelected == false) {
                 selectedObject = &WorldObjects[tempobjectcounter];
+                selectingNewImage = false;
+                selectingNewComponent = false;
                 objectSelected = true;
             }
             if (selectedObject != NULL && sf::Mouse().isButtonPressed(sf::Mouse().Left) && mouseCollision.Transform.getGlobalBounds().intersects(selectedObject->Transform.getGlobalBounds())) {
@@ -452,6 +509,12 @@ int main() {
             //camOffset = sf::Vector2f(camOffset.x, camOffset.y + cameraSpeed);
             Camera.move(0, -cameraSpeed);
         }
+
+
+
+        //Update Game Loop
+        Update();
+
 
 
         /*
@@ -858,20 +921,66 @@ int main() {
                 sf::Sprite texSprite = selectedObject->Transform;
                 texSprite.setScale(previewSpriteScale, previewSpriteScale);
                 //texSprite.setTexture(selectedObject->Transform.getTexture());
-
-                ImGui::Image(texSprite);
-                if (ImGui::Button("Select Sprite")) {
-                    selectedObject->LoadNewTexture(OpenFileExplorer());
+                //ImGui::Image(texSprite);
+                if (ImGui::Button("Select Image")) {
+                    selectingNewImage = true;
                 }
 
-                //Compponents
+                //Select Image Window
+                if (selectingNewImage) {
+                    int newimageindex = 0;
+                    //ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.2f, 0.2f, 0.25f, 0.9f));
+                    ImGui::Begin("Select Texture");
+                    for (size_t i = 0; i < worldGameTex.size(); i++)
+                    {
+                        ImGui::PushID(i);
+                        if (ImGui::ImageButton("Textures List", worldGameTex[i].texture, sf::Vector2f(50, 50),sf::Color(0,0,0,0))) {
+                            selectedObject->SetObjectTexture(i);
+                            selectingNewImage = false;
+                        }
+                        ImGui::PopID();
+                    }
+                    ImGui::End();
+                    //
+                }
+
+                //ImGui::Image(texSprite);
+                if (ImGui::ImageButton("ObjectTex", texSprite, sf::Vector2f(90, 90), sf::Color(0, 0, 0, 0))) {
+                    //selectedObject->SetObjectTexture(i);
+                    //selectingNewImage = false;
+                }
+                if (ImGui::Button("Load New Image")) {
+                    selectedObject->LoadNewTexture(OpenFileExplorer());
+                }
+                ImGui::Separator();
+                
+                //Components
+                //ImGui::Text("Components:");
                 if (selectedObject != NULL) {
                     for (size_t i = 0; i < selectedObject->components.size(); i++)
                     {
+                        ImGui::Text(selectedObject->components[i]->returnName().c_str());
                         selectedObject->components[i]->EditorUI();
                     }
                 }
+                if(ImGui::Button("Add Component")) {
+                    selectingNewComponent = true;
+                }
 
+                //Add component Window
+                if (selectingNewComponent) {
+                    ImGui::Begin("Components");
+                    map<string, int>::iterator it;
+                    for (auto const& x : classFactory)
+                    {
+                        if (ImGui::Button(x.first.c_str())) {
+                            selectedObject->AddComponent(CreateComponent(x.first.c_str()), &WorldObjects[selectedObject->numInWorldObjects]);
+                            selectingNewComponent = false;
+                        }
+                    }
+
+                    ImGui::End();
+                }
 
 
                 //ImGui::Text(selectedObject->name.c_str());
@@ -885,8 +994,9 @@ int main() {
             ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.2f, 0.2f, 0.25f, 0.9f));
             ImGui::Begin("Object List");
             if (ImGui::Button("Create new Object")) {
-                GameObject mynewobj("DefaultSprite.png");
+                GameObject mynewobj(0);
                 mynewobj.name = "New Object";
+                //mynewobj.textureIndex = 0;
                 mynewobj.renderLayer = mouseLayer;
                 mynewobj.myTexture = "DefaultSprite.png";
                 mynewobj.numInWorldObjects = WorldObjects.size();
@@ -930,6 +1040,26 @@ int main() {
 
             //////////////////////////////
 
+
+
+            //Texture List
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.2f, 0.2f, 0.25f, 0.9f));
+            ImGui::Begin("Texture List");
+            //Add new texture button
+            if (ImGui::Button("Add New Texture")) {
+                CreateTexture(OpenFileExplorer());
+            }
+            for (size_t i = 0; i < worldGameTex.size(); i++)
+            {
+                ImGui::PushID(i);
+                
+                if (ImGui::ImageButton("Textures List", worldGameTex[i].texture, sf::Vector2f(50, 50), sf::Color(0, 0, 0, 0))) {
+                }
+                ImGui::PopID();
+                ImGui::SameLine();
+            }
+
+            ImGui::End();
         }
 
 
@@ -1010,11 +1140,23 @@ int main() {
                     };
                     window.draw(line, 2, sf::Lines);
                 }
+
+                //Draw text that shows mouse co-ords
+                sf::Text mcoords;
+                mcoords.setPosition(mouseCollision.Transform.getPosition().x + 17, mouseCollision.Transform.getPosition().y + 17);
+                mcoords.setFont(font);
+                string mousecoordsstring = "X: " + to_string(static_cast<int>(mouseCollision.Transform.getPosition().x)) + "  Y:" + to_string(static_cast<int>(mouseCollision.Transform.getPosition().y));
+                mcoords.setString(mousecoordsstring);
+                mcoords.setCharacterSize(15);
+                mcoords.setFillColor(sf::Color::White);
+                window.draw(mcoords);
+
             }
             ///////////////////////////////
 
 
             //window.draw(text);
+
         }
 
         //editor UI

@@ -26,9 +26,6 @@ using namespace std;
 vector<string> objectListStrings; //Used for Editor UI
 void ObjectListUpdate(vector<GameObject>& worldObjects);
 
-//The Camera
-sf::View Camera;
-
 
 
 int main() {
@@ -38,6 +35,7 @@ int main() {
 
     srand(time(NULL)); //Set random seed
     
+    /*
     sf::Texture testex;
     testex.loadFromFile("ball.png");
     texObject mytester;
@@ -65,12 +63,15 @@ int main() {
     mytester4.myFileName = "skycolor.png";
     mytester4.texture = testex4;
     worldGameTex.push_back(mytester4);
+    */
    
     //All World Objects
     vector <GameObject> WorldObjects;
     WorldObjects.reserve(25000); //Set this to a little more than what you think your game will use at max
     worldGameTex.reserve(1000); //Set this to a little more than what you think your game will use at max
     
+    bool hasRanStart = false;
+
     vector <GameObject> WorldParticles;
     WorldParticles.reserve(25000);
 
@@ -114,8 +115,12 @@ int main() {
     sf::Vector2i midMouseInit = sf::Vector2i(0, 0);
     bool selectingNewImage = false;
     bool selectingNewComponent = false;
-    
-    
+    string startingScene = "TestSave.scene";///////////////////////////////////////////////////////////////////////Change this to the starting scene FilePath
+    LoadScene(startingScene, WorldObjects);
+    currentScene = startingScene;
+    bool saveAsWindow = false;
+    string newFileName = "";
+    bool playMode = false;
 
     float fps;
     sf::Clock clock = sf::Clock::Clock();
@@ -131,7 +136,7 @@ int main() {
   //Game object creation
     
    
-
+    /*
     GameObject test(0);
     //GameObject test;
     //test.LoadNewTexture("ball.png");
@@ -202,6 +207,9 @@ int main() {
     WorldObjects[4].AddComponent(CreateComponent("SimplePhysics"), &WorldObjects[4]);
     WorldObjects[4].AddComponent(CreateComponent("ChangeSpeed"), &WorldObjects[4]);
 
+    */
+
+
     //Large Size Testing
     /*
     for (size_t i = 0; i < 500; i++)
@@ -241,15 +249,11 @@ int main() {
 
     ObjectListUpdate(WorldObjects);//initialize
 
-    //Start function of all Components
-    for (size_t i = 0; i < WorldObjects.size(); i++)
-    {
-        WorldObjects[i].ComponentsStart();
-    }
+    
 
     //Setup mouse collision detection sprite
     sf::Texture mousecoltex;
-    mousecoltex.loadFromFile("MouseCollisionSprite.png");
+    mousecoltex.loadFromFile("Assets\\MouseCollisionSprite.png");
     mouseCollision.Transform.setTexture(mousecoltex);
     sf::IntRect newmouserect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(mousecoltex.getSize().x, mousecoltex.getSize().y)));
     mouseCollision.Transform.setTextureRect(newmouserect);
@@ -263,10 +267,22 @@ int main() {
         // Clear the window
         window.clear();
 
+        //Start function of all Components
+        if (hasRanStart == false && playMode) {
+            for (size_t i = 0; i < WorldObjects.size(); i++)
+            {
+                //cout << "starting all gameobject components++++++++++++++++++++++++++++++++++++" << endl;
+                WorldObjects[i].ComponentsStart();
+            }
+            hasRanStart = true;
+        }
+
         //Run all Component Updates:
-        for (size_t i = 0; i < WorldObjects.size(); i++)
-        {
-            WorldObjects[i].ComponentsUpdate();
+        if (playMode) {
+            for (size_t i = 0; i < WorldObjects.size(); i++)
+            {
+                WorldObjects[i].ComponentsUpdate();
+            }
         }
 
 
@@ -482,14 +498,15 @@ int main() {
             //WorldObjects[0].yVelocity = 100;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
-            WorldObjects[0].Transform.setScale(WorldObjects[0].Transform.getScale().x + 0.01, WorldObjects[0].Transform.getScale().y + 0.01);
+            //WorldObjects[0].Transform.setScale(WorldObjects[0].Transform.getScale().x + 0.01, WorldObjects[0].Transform.getScale().y + 0.01);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::V)) {
-            WorldObjects[0].Transform.setScale(WorldObjects[0].Transform.getScale().x - 0.01, WorldObjects[0].Transform.getScale().y - 0.01);
+            //WorldObjects[0].Transform.setScale(WorldObjects[0].Transform.getScale().x - 0.01, WorldObjects[0].Transform.getScale().y - 0.01);
         }
 
 
         //CAMERA MOVEMENT TEST
+        /*
         float cameraSpeed = 5.0;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) {
             //camOffset = sf::Vector2f(camOffset.x - cameraSpeed, camOffset.y);
@@ -509,6 +526,7 @@ int main() {
             //camOffset = sf::Vector2f(camOffset.x, camOffset.y + cameraSpeed);
             Camera.move(0, -cameraSpeed);
         }
+        */
 
 
 
@@ -660,7 +678,14 @@ int main() {
                 {
                     if (ImGui::MenuItem("Save"))
                     {
-                        SaveScene(WorldObjects, "TestSave");
+                        string newFileName = "Assets\\" + currentScene;
+                        SaveScene(WorldObjects, newFileName);
+                        cout << newFileName << endl;
+                    }
+
+                    if (ImGui::MenuItem("Save As")) {
+                        
+                        saveAsWindow = true;
                     }
 
                     if (ImGui::MenuItem("Load"))
@@ -668,7 +693,9 @@ int main() {
                         //TODO: Ask if you want to save before loading
                     //for now, clear vector
                         WorldObjects.clear();
-                        LoadScene("TestSave", WorldObjects);
+                        string theFile = OpenFileExplorer();
+                        LoadScene(theFile, WorldObjects);
+
                         //Loop through all new objects and set them up.
                         //Only have to do this in main because of stupid dereferencing which should even be happening
                         for (size_t i = 0; i < WorldObjects.size(); i++)
@@ -702,6 +729,26 @@ int main() {
                     ImGui::EndMenu();
                 }
 
+                if (saveAsWindow) {
+                    ImGui::Begin("-Save Scene As-");
+                    ImGui::Text("File Name:");
+                    
+                    static char filenameInputText[256] = ""; // Buffer to hold the input text
+                    if (ImGui::InputText("##FileName", filenameInputText, IM_ARRAYSIZE(filenameInputText))) {
+                        newFileName = filenameInputText;
+                    }
+                    string filenamefixed = "Assets\\" + newFileName + ".scene";
+                    if (ImGui::Button("Save")) {
+                        SaveScene(WorldObjects, filenamefixed);
+                        saveAsWindow = false;
+                    }
+                    if (ImGui::Button("Close")) {
+                        saveAsWindow = false;
+                    }
+                    
+                    ImGui::End();
+                }
+
                 /*
                 if (ImGui::Button("Save Scene Temp")) {
                     SaveScene(WorldObjects, "TestSave");
@@ -724,8 +771,37 @@ int main() {
                 }
                 */
                 ImGui::SameLine();
+                ImGui::Text("                                              ");
+                ImGui::SameLine();
+                if (playMode == false) {
+                    if (ImGui::Button("Play")) {
+                        string newFileName = "Assets\\" + currentScene;
+                        SaveScene(WorldObjects, newFileName);
+                        cout << newFileName << endl;
+                        playMode = true;
+                    }
+                }
+                else {
+                    if (ImGui::Button("Stop")) {
+                        WorldObjects.clear();
+                        string fixedFileName = "Assets\\" + currentScene;
+                        LoadScene(fixedFileName, WorldObjects);
+                        //Loop through all new objects and set them up.
+                        //Only have to do this in main because of stupid dereferencing which should even be happening
+                        for (size_t i = 0; i < WorldObjects.size(); i++)
+                        {
+                            WorldObjects[i].Setup();
+                            WorldObjects[i].worldObjects = &WorldObjects;
+                        }
+                        ObjectListUpdate(WorldObjects);
+                        playMode = false;
+                        hasRanStart = false;
+                    }
+                }
+                ImGui::SameLine();
                 //Level Name
-                ImGui::Text("                                       Scene One | ");
+                string levName = "                                 " + currentScene + " | ";
+                ImGui::Text(levName.c_str());
                 //ImGui::Separator();
 
                 //Layer
@@ -936,7 +1012,7 @@ int main() {
                         ImGui::PushID(i);
                         if (ImGui::ImageButton("Textures List", worldGameTex[i].texture, sf::Vector2f(50, 50),sf::Color(0,0,0,0))) {
                             selectedObject->SetObjectTexture(i);
-                            selectingNewImage = false;
+                            selectingNewImage = !selectingNewImage;
                         }
                         ImGui::PopID();
                     }
@@ -950,21 +1026,45 @@ int main() {
                     //selectingNewImage = false;
                 }
                 if (ImGui::Button("Load New Image")) {
-                    selectedObject->LoadNewTexture(OpenFileExplorer());
+
+                    string searched = OpenFileExplorer();
+                    reverse(searched.begin(), searched.end());
+                    string s = searched;
+                    string delimiter = "\\";
+                    string newName = s.substr(0, s.find(delimiter));
+                    reverse(newName.begin(), newName.end());
+                    cout << newName << endl;
+                    string finalName = "Assets\\" + newName;
+
+                    selectedObject->LoadNewTexture(finalName);
                 }
+                ImGui::Text("               ");
                 ImGui::Separator();
                 
                 //Components
+                // Need a way to delete them...
                 //ImGui::Text("Components:");
                 if (selectedObject != NULL) {
                     for (size_t i = 0; i < selectedObject->components.size(); i++)
                     {
+                        
                         ImGui::Text(selectedObject->components[i]->returnName().c_str());
+                        ImGui::SameLine();
+                        ImGui::PushID(i);
+                        if (ImGui::Button("X")) {
+                            //Remove Component
+                            selectedObject->components.erase(selectedObject->components.begin() + i);
+                        }
+                        ImGui::PopID();
+                        ImGui::Indent(16.0f);
+                        ImGui::Separator();
                         selectedObject->components[i]->EditorUI();
+                        ImGui::Indent(-16.0f);
+                        
                     }
                 }
                 if(ImGui::Button("Add Component")) {
-                    selectingNewComponent = true;
+                    selectingNewComponent = !selectingNewComponent;
                 }
 
                 //Add component Window
@@ -1047,7 +1147,16 @@ int main() {
             ImGui::Begin("Texture List");
             //Add new texture button
             if (ImGui::Button("Add New Texture")) {
-                CreateTexture(OpenFileExplorer());
+
+                string searched = OpenFileExplorer();
+                reverse(searched.begin(), searched.end());
+                string s = searched;
+                string delimiter = "\\";
+                string newName = s.substr(0, s.find(delimiter));
+                reverse(newName.begin(), newName.end());
+                cout << newName << endl;
+                string finalName = "Assets\\" + newName;
+                CreateTexture(finalName);
             }
             for (size_t i = 0; i < worldGameTex.size(); i++)
             {

@@ -16,6 +16,9 @@ using namespace std;
 vector<texObject> worldGameTex;
 class GameObject;
 
+//The Camera
+sf::View Camera;
+
 class Component {
 public:
 	string compName = "";
@@ -207,6 +210,7 @@ public:
 		for (size_t i = 0; i < components.size(); i++)
 		{
 			components[i]->Start();
+			//cout << "Started____________________________________________________" << components[i];
 		}
 	}
 
@@ -503,6 +507,44 @@ public:
 
 };
 
+class CameraControl : public Component {
+public:
+	CameraControl() : Component() {}
+	string compName = "CameraControl";
+
+	GameObject* Player;
+
+	//myObject is a pointer to the object this component is attached to
+	void Start() override {
+		//Will run once at the start
+		
+		int count = myObject->worldObjects->size();
+		for (size_t i = 0; i < count; i++)
+		{
+			if (myObject->worldObjects->at(i).name == "PlayerBall") {
+				Player = &myObject->worldObjects->at(i);
+			}
+		}
+		
+	}
+	void Update() override {
+		//Will run every frame
+		
+		//myObject->Transform.setPosition(Player->Transform.getPosition());
+		//cout << Player->Transform.getPosition().x << endl;
+		Camera.setCenter(Player->Transform.getPosition());
+		//dynamic_cast<PlayerMoveTest*>(myObject->components[0])->speed = fastSpeed;
+
+
+		//Exmaple of how to access GameObject Components
+		//dynamic_cast<ComponentName*>(WorldObjects[ObjectIndex].components[ComponentIndex])->speed = 700;
+	}
+
+	string returnName() {
+		return compName;
+	}
+
+};
 
 
 
@@ -531,6 +573,7 @@ std::map<std::string, std::function<Component* ()>> classFactory = {
 	{"SimplePhysics", []() { return new SimplePhysics(); }},
 	{"SimpleSpriteCollision", []() { return new SimpleSpriteCollision(); }},
 	{"ChangeSpeed", []() { return new ChangeSpeed(); }},
+	{"CameraControl", []() { return new CameraControl(); }},
 	
 };
 

@@ -6,12 +6,15 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "GameObject.h"
+#include <sstream>
 
 
 using namespace std;
 
+string currentScene = "";
+
 void SaveScene(std::vector<GameObject>& objects, string filename) {
-    filename = filename + ".scene";
+    //filename = filename + ".scene";
     ofstream outputFile(filename, ios::binary);
     if (outputFile.is_open()) {
         //Meta Data
@@ -30,6 +33,8 @@ void SaveScene(std::vector<GameObject>& objects, string filename) {
 				outputFile << objects[i].Transform.getPosition().x << "*" << objects[i].Transform.getPosition().y << "*";
 				//Scale
 				outputFile << objects[i].Transform.getScale().x << "*" << objects[i].Transform.getScale().y << "*";
+				//Rotation
+				outputFile << objects[i].Transform.getRotation() << "*";
 				//Texture
 				outputFile << objects[i].myTexture << "*";
 				//RenderLayer
@@ -78,12 +83,25 @@ void SaveScene(std::vector<GameObject>& objects, string filename) {
 
 //vector<GameObject> LoadScene(string filename) {
 void LoadScene(string filename, vector<GameObject> &gameObjects) {
-	filename = filename + ".scene";
+	//filename = filename + ".scene";
+
+	//Get Just the File Name, in assets folder
+	reverse(filename.begin(), filename.end());
+	string s = filename;
+	string delimiter = "\\";
+	string newName = s.substr(0, s.find(delimiter));
+	reverse(newName.begin(), newName.end());
+	cout << newName << endl;
+	string finalName = "Assets\\" + newName;
+	cout << finalName << endl;
+	currentScene = newName;
+	//getline(reverse(filename.begin(), filename.end()), newName);
+
 	worldGameTex.clear();
 	string sceneData = "";
 	int objectnum = 0;
 	int numOfObjects = 0;
-    ifstream inputFile(filename);
+    ifstream inputFile(finalName);
     if (inputFile.is_open()) {
 		//GetSceneName
 		getline(inputFile, sceneData);
@@ -113,6 +131,9 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 			string lscaley;
 			getline(inputFile, sceneData, '*');
 			lscaley = sceneData;
+			string lrot;
+			getline(inputFile, sceneData, '*');
+			lrot = sceneData;
 			string ltexture;
 			getline(inputFile, sceneData, '*');
 			ltexture = sceneData;
@@ -160,6 +181,7 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 			loadedGameObject.position.y = stof(lposy);
 			loadedGameObject.scale.x = stof(lscalex);
 			loadedGameObject.scale.y = stof(lscaley);
+			loadedGameObject.rotation = stof(lrot);
 			loadedGameObject.myTexture = ltexture;
 			loadedGameObject.numInWorldObjects = objectnum;
 			loadedGameObject.renderLayer = stoi(lrenderlayer);
@@ -218,7 +240,19 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 		//get textures in list
 		for (size_t i = 0; i < texNames.size(); i++)
 		{
-			CreateTexture(texNames[i]);
+			
+
+			reverse(texNames[i].begin(), texNames[i].end());
+			string s = texNames[i];
+			string delimiter = "\\";
+			string newName = s.substr(0, s.find(delimiter));
+			reverse(newName.begin(), newName.end());
+			cout << newName << endl;
+			string finalName = "Assets\\" + newName;
+			//currentScene = newName;
+
+
+			CreateTexture(finalName);
 		}
 		for (size_t i = 0; i < gameObjects.size(); i++)
 		{

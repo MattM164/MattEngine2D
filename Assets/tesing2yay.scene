@@ -1,0 +1,9 @@
+Assets\tesing2yay.scene
+6
+PlayerBall*266.508*850.224*1*1* *0*0*0*4*PlayerMoveTest SimpleSpriteCollision SimplePhysics ChangeSpeed 
+Ground*800*1100*17*2* *1*0*1*0*
+Ground2*1900*700*17*2* *1*0*1*0*
+sky*0*0*10*10* *2*1*3*0*
+spawner*931.766*950.175*1*1* *0*0*2*4*PlayerMoveTest SimpleSpriteCollision SimplePhysics ChangeSpeed 
+Plyaer2*1131.11*475.128*3*5*DefaultSprite.png*0*0*4*3*SimpleSpriteCollision SimplePhysics PlayerMoveTest 
+5%ball.png%MetalGround.png%DefaultSprite.png%skycolor.png%C:\Users\Matthew Mulholland\source\repos\MattEngine2D\fence.png%

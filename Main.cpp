@@ -22,6 +22,8 @@
 using namespace std;
 
 
+bool editor = true;  //Change this to false when you want to build release
+
 //Global Variables
 vector<string> objectListStrings; //Used for Editor UI
 void ObjectListUpdate(vector<GameObject>& worldObjects);
@@ -93,7 +95,7 @@ int main() {
     std::chrono::duration<int, std::milli> timeElapsed;
 
         //Editor
-    bool editor = true;  //Change this to false when you want to build release
+   
     GameObject mouseCollision("MouseCollisionSprite.png");
     bool holdingLeftMouse = false;
     bool objectSelected = false;
@@ -134,7 +136,6 @@ int main() {
 
 
   //Game object creation
-    
    
     /*
     GameObject test(0);
@@ -267,11 +268,14 @@ int main() {
         // Clear the window
         window.clear();
 
+        if (!editor) {
+            playMode = true;
+        }
+
         //Start function of all Components
         if (hasRanStart == false && playMode) {
             for (size_t i = 0; i < WorldObjects.size(); i++)
             {
-                //cout << "starting all gameobject components++++++++++++++++++++++++++++++++++++" << endl;
                 WorldObjects[i].ComponentsStart();
             }
             hasRanStart = true;
@@ -335,6 +339,7 @@ int main() {
         }else { 
             holdingLeftMouse = true; 
         }
+
 
         mouseCollision.Transform.setPosition(sf::Mouse::getPosition(window).x + cameraOffset.x - Camera.getSize().x/2, sf::Mouse::getPosition(window).y + cameraOffset.y - Camera.getSize().y/2);
         if (editor) {
@@ -1269,7 +1274,7 @@ int main() {
         }
 
         //editor UI
-        if (selectedObject != NULL) {
+        if (editor && selectedObject != NULL) {
             window.draw(outline);
             window.draw(selCenter);
         }

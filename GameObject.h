@@ -530,14 +530,9 @@ public:
 	void Update() override {
 		//Will run every frame
 		
-		//myObject->Transform.setPosition(Player->Transform.getPosition());
-		//cout << Player->Transform.getPosition().x << endl;
 		Camera.setCenter(Player->Transform.getPosition());
 		//dynamic_cast<PlayerMoveTest*>(myObject->components[0])->speed = fastSpeed;
 
-
-		//Exmaple of how to access GameObject Components
-		//dynamic_cast<ComponentName*>(WorldObjects[ObjectIndex].components[ComponentIndex])->speed = 700;
 	}
 
 	string returnName() {

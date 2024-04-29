@@ -10,9 +10,9 @@ Current Features:
   -  Component 'System'
 
 Features to Add: 
-  -  Better Physics and Collision Detection
-  -  Save and Load Components
-  -  Better Texture Handling
+  -  Better Physics and Collision Detection (Done)
+  -  Save and Load Components (Done)
+  -  Better Texture Handling (Done)
 
 Uses:
   - SFML for sprite rendering

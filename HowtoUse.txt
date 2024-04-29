@@ -1,0 +1,10 @@
+-Here are the little things you have to remember when developing with this engine-
+
+All Assets must be placed in the 'Assets' folder in the same directory as the .exe
+
+//To make a component, copy and paste the template below.  Change the three instances of 'MyComponent'
+// to the name of your component. Then, duplicate a line from the map at the bottom of the GameObject.h file
+// and replace the name of the class to your new class name.  You may need to declare the name of the component
+// at the top of this file to access it from below.
+
+When building final game, set the editor bool at the top of main.cpp to false

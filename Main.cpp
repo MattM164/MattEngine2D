@@ -32,7 +32,7 @@ void ObjectListUpdate(vector<GameObject>& worldObjects);
 
 int main() {
   //Setup
-    sf::RenderWindow window(sf::VideoMode(2000, 1200), "Game");
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Game");
     window.setFramerateLimit(144);
 
     srand(time(NULL)); //Set random seed

@@ -342,7 +342,7 @@ int main() {
 
 
         mouseCollision.Transform.setPosition(sf::Mouse::getPosition(window).x + cameraOffset.x - Camera.getSize().x/2, sf::Mouse::getPosition(window).y + cameraOffset.y - Camera.getSize().y/2);
-        if (editor) {
+        if (editor && window.hasFocus()) {
             int tempobjectcounter = -1;
             if (objectSelected == false) {
                 for (size_t i = 0; i < WorldObjects.size(); i++)

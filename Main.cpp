@@ -289,7 +289,11 @@ int main() {
             }
         }
 
+        //Update ImGUI
+        ImGui::SFML::Update(window, deltaClock.restart());
+        bool mouseNotOverImGui = !ImGui::GetIO().WantCaptureMouse;
 
+      
         //Where is the camera
         //cout << "Cam Offset: " << Camera.getCenter().x << endl;
         cameraOffset = sf::Vector2f(Camera.getCenter().x, Camera.getCenter().y);
@@ -300,7 +304,7 @@ int main() {
             ImGui::SFML::ProcessEvent(event);
             if (event.type == sf::Event::Closed) {
                 window.close();
-            }else if (event.type == sf::Event::MouseWheelScrolled) {  //Scroll wheel changing the layer
+            }else if (event.type == sf::Event::MouseWheelScrolled && mouseNotOverImGui) {  //Scroll wheel changing the layer
                 if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
                     
                     if (event.mouseWheelScroll.delta > 0) {
@@ -317,8 +321,6 @@ int main() {
                 break;
             }
         }
-        //Update ImGUI
-        ImGui::SFML::Update(window, deltaClock.restart());
 
 
         ///////FPS   From imanifacier
@@ -342,7 +344,7 @@ int main() {
 
 
         mouseCollision.Transform.setPosition(sf::Mouse::getPosition(window).x + cameraOffset.x - Camera.getSize().x/2, sf::Mouse::getPosition(window).y + cameraOffset.y - Camera.getSize().y/2);
-        if (editor && window.hasFocus()) {
+        if (editor && window.hasFocus() && mouseNotOverImGui) {
             int tempobjectcounter = -1;
             if (objectSelected == false) {
                 for (size_t i = 0; i < WorldObjects.size(); i++)

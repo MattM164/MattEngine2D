@@ -550,6 +550,90 @@ public:
 
 
 
+class Movement : public Component {
+public:
+	Movement() : Component() {}
+	string compName = "Movement";
+	float speed = 3;
+
+	//myObject is a pointer to the object this component is attached to
+	void Start() override {
+		//Will run once at the start
+	}
+	void Update() override {
+		//Will run every frame
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+
+			//myObject->Transform.rotate(1);
+			float rotation = myObject->Transform.getRotation() + 90;
+			float angleRad = rotation * (3.14159265359f / 180.0f); // Convert to radians
+			float dx = std::cos(angleRad) * speed; // Calculate horizontal movement
+			float dy = std::sin(angleRad) * speed; // Calculate vertical movement
+
+			myObject->Transform.move(dx, dy);
+
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+			
+			//myObject->Transform.rotate(-1);
+			float rotation = myObject->Transform.getRotation() - 90;
+			float angleRad = rotation * (3.14159265359f / 180.0f); // Convert to radians
+			float dx = std::cos(angleRad) * speed; // Calculate horizontal movement
+			float dy = std::sin(angleRad) * speed; // Calculate vertical movement
+
+			myObject->Transform.move(dx, dy);
+			
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			
+			float rotation = myObject->Transform.getRotation();
+			float angleRad = rotation * (3.14159265359f / 180.0f); // Convert to radians
+			float dx = std::cos(angleRad) * speed; // Calculate horizontal movement
+			float dy = std::sin(angleRad) * speed; // Calculate vertical movement
+
+			myObject->Transform.move(dx, dy);
+			//std::cout << "Rotation: " << rotation << ", dx: " << dx << ", dy: " << dy << std::endl; // Debugging
+			//myObject->Transform.move(-dx, -dy);
+			
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+
+			float rotation = myObject->Transform.getRotation();
+			float angleRad = rotation * (3.14159265359f / 180.0f); // Convert to radians
+			float dx = std::cos(angleRad) * -speed; // Calculate horizontal movement
+			float dy = std::sin(angleRad) * -speed; // Calculate vertical movement
+
+			myObject->Transform.move(dx, dy);
+			//std::cout << "Rotation: " << rotation << ", dx: " << dx << ", dy: " << dy << std::endl; // Debugging
+			//myObject->Transform.move(-dx, -dy);
+
+		}
+
+
+
+
+
+
+
+		//Exmaple of how to access GameObject
+		//dynamic_cast<ComponentName*>(WorldObjects[ObjectIndex].components[ComponentIndex])->speed = 700;
+	}
+
+	string returnName() {
+		return compName;
+	}
+
+};
+
+
+
+
+
+
+
+
+
 
 
 GameObject* FindGameObject(string search, vector<GameObject>* worldObjects) {
@@ -569,6 +653,7 @@ std::map<std::string, std::function<Component* ()>> classFactory = {
 	{"SimpleSpriteCollision", []() { return new SimpleSpriteCollision(); }},
 	{"ChangeSpeed", []() { return new ChangeSpeed(); }},
 	{"CameraControl", []() { return new CameraControl(); }},
+	{"Movement", []() { return new Movement(); }},
 	
 };
 

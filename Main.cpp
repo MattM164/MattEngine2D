@@ -13,6 +13,9 @@
 #include <cmath>
 #include "SaveLoadScene.h"
 #include "GameLoop.h"
+#include <cmath>
+#include <math.h>
+#include "Raycast.h"
 
 //ImGui Libraries
 #include "imgui.h"
@@ -28,11 +31,20 @@ bool editor = true;  //Change this to false when you want to build release
 vector<string> objectListStrings; //Used for Editor UI
 void ObjectListUpdate(vector<GameObject>& worldObjects);
 
+//Raycast Test WALLS
+vector<wall> walls;
+
+
+float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
+{
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 
 
 int main() {
   //Setup
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Game");
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Matt2DRaycaster");
     window.setFramerateLimit(144);
 
     srand(time(NULL)); //Set random seed
@@ -85,6 +97,93 @@ int main() {
     sf::Vector2f cameraOffset;
             //Any mouse position calculations need to take into account the camera offset
     Camera.setCenter(700,600);
+
+
+
+
+
+    /*
+    wall myWall;
+    myWall.p1 = sf::Vector2f(300, 300);
+    myWall.p2 = sf::Vector2f(800, 500);
+    walls.push_back(myWall);
+    wall wall2;
+    wall2.p1 = sf::Vector2f(900, 900);
+    wall2.p2 = sf::Vector2f(450, 550);
+    walls.push_back(wall2);
+    */
+    /*
+    for (size_t i = 0; i < 10; i++)
+    {
+        wall myWallg;
+        myWallg.p1 = sf::Vector2f(rand() % 1200 + 200, rand() % 1200 + 200);
+        myWallg.p2 = sf::Vector2f(rand() % 1200 + 200, rand() % 1200 + 200);
+        walls.push_back(myWallg);
+    }
+    */
+    
+    wall wallout;
+    wallout.p1 = sf::Vector2f(0, 0);
+    wallout.p2 = sf::Vector2f(1200, 0);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(1200, 0);
+    wallout.p2 = sf::Vector2f(1200, 1200);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(1200, 1200);
+    wallout.p2 = sf::Vector2f(0, 1200);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(0, 1200);
+    wallout.p2 = sf::Vector2f(0, 0);
+    walls.push_back(wallout);
+    //////////////
+    /*
+    wallout.p1 = sf::Vector2f(80, 80);
+    wallout.p2 = sf::Vector2f(160, 80);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(160, 80);
+    wallout.p2 = sf::Vector2f(160, 160);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(160, 160);
+    wallout.p2 = sf::Vector2f(80, 160);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(80, 160);
+    wallout.p2 = sf::Vector2f(80, 80);
+    walls.push_back(wallout);
+    ////////////////////
+    wallout.p1 = sf::Vector2f(700, 800);
+    wallout.p2 = sf::Vector2f(850, 800);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(850, 800);
+    wallout.p2 = sf::Vector2f(850, 1000);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(850, 1000);
+    wallout.p2 = sf::Vector2f(700, 1000);
+    walls.push_back(wallout);
+    wallout.p1 = sf::Vector2f(700, 1000);
+    wallout.p2 = sf::Vector2f(700, 800);
+    walls.push_back(wallout);
+    */
+    for (size_t i = 0; i < 10; i++)
+    {
+        sf::Vector2f offset(rand() % 1100 + -800, rand() % 1100 + -800);
+        wallout.p1 = sf::Vector2f(700 + offset.x, 800 + offset.y);
+        wallout.p2 = sf::Vector2f(850 + offset.x, 800 + offset.y);
+        walls.push_back(wallout);
+        wallout.p1 = sf::Vector2f(850 + offset.x, 800 + offset.y);
+        wallout.p2 = sf::Vector2f(850 + offset.x, 1000 + offset.y);
+        walls.push_back(wallout);
+        wallout.p1 = sf::Vector2f(850 + offset.x, 1000 + offset.y);
+        wallout.p2 = sf::Vector2f(700 + offset.x, 1000 + offset.y);
+        walls.push_back(wallout);
+        wallout.p1 = sf::Vector2f(700 + offset.x, 1000 + offset.y);
+        wallout.p2 = sf::Vector2f(700 + offset.x, 800 + offset.y);
+        walls.push_back(wallout);
+    }
+
+
+
+
+
     
 
         //Physics
@@ -117,7 +216,7 @@ int main() {
     sf::Vector2i midMouseInit = sf::Vector2i(0, 0);
     bool selectingNewImage = false;
     bool selectingNewComponent = false;
-    string startingScene = "TestSave.scene";///////////////////////////////////////////////////////////////////////Change this to the starting scene FilePath
+    string startingScene = "raycastTest.scene";///////////////////////////////////////////////////////////////////////Change this to the starting scene FilePath
     LoadScene(startingScene, WorldObjects);
     currentScene = startingScene;
     bool saveAsWindow = false;
@@ -1278,6 +1377,123 @@ int main() {
             window.draw(outline);
             window.draw(selCenter);
         }
+
+
+        //RAYCAST TESTING///////////////////////////////////////////////////////////////////////////////
+        
+
+
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+        // Calculate the change in mouse position since the last frame
+        static sf::Vector2i prevMousePosition = mousePosition;
+        sf::Vector2i mouseDelta = mousePosition - prevMousePosition;
+        prevMousePosition = mousePosition;
+
+        // Update sprite rotation based on horizontal mouse movement
+        float rotationSpeed = 0.13f;
+        WorldObjects[0].Transform.rotate(rotationSpeed * mouseDelta.x);
+
+
+        // Wrap mouse position if it goes beyond window boundaries
+        if (mousePosition.x < 0 && editor == false) {
+            sf::Mouse::setPosition(sf::Vector2i(window.getSize().x, mousePosition.y), window);
+            prevMousePosition.x = window.getSize().x;
+        }
+        else if (mousePosition.x > window.getSize().x && editor == false) {
+            sf::Mouse::setPosition(sf::Vector2i(0, mousePosition.y), window);
+            prevMousePosition.x = 0;
+        }
+
+
+
+
+        //myWall.draw(&window);
+        int rayCount = 200;
+        float fov = 85;
+        float angleIncrement = fov / (rayCount - 1);
+        float angle = -fov / 2.0f;
+
+        for (size_t i = 0; i < rayCount; i++)
+        {
+            Raycast myRay(WorldObjects[0].Transform.getPosition(), (WorldObjects[0].Transform.getRotation() + angle), 1000);
+            angle += angleIncrement;
+            for (size_t k = 0; k < walls.size(); k++)
+            {
+                sf::Vector2f interceptPoint = myRay.checkCollision(myRay.origin, myRay.endPoint, walls[k].p1, walls[k].p2);
+                myRay.endPoint = interceptPoint;
+            }
+
+                float dist = sqrt(std::pow((myRay.endPoint.x - WorldObjects[0].Transform.getPosition().x), 2) + std::pow((myRay.endPoint.y - WorldObjects[0].Transform.getPosition().y), 2));
+                
+                float testangle = atan2(i, 90);
+
+
+                float fixeddist = dist * cos(myRay.angle * (3.14159 / 180) - WorldObjects[0].Transform.getRotation() * (3.14159 / 180));
+
+                float distfixs = mapFloat(fixeddist, 0, 1000, 0, 1);
+
+                float colordist = mapFloat(dist, 1000, 0, 0, 100);
+                float distfixc = mapFloat(colordist, 0, 100, 0, 230);
+
+                float lastfixs = mapFloat(distfixs, 0, 1, 1, 0);
+
+                //dist * Cos(Ray Angle - Player Angle)
+                sf::RectangleShape shape;// (sf::Vector2f(i + 5, 500) );
+                
+                shape.setPosition(sf::Vector2f(i * 8.5 - 155, 600));
+                shape.setSize(sf::Vector2f(8.5,200*(1000/fixeddist)));
+                shape.setOrigin(sf::Vector2f(shape.getSize().x / 2, shape.getSize().y / 2));
+                shape.setScale(1,1);
+                shape.setFillColor(sf::Color(distfixc, distfixc, distfixc));
+                window.draw(shape);
+            
+
+            //myRay.draw(&window);
+
+           
+        }
+
+        sf::RectangleShape sides;// (sf::Vector2f(i + 5, 500) );
+
+        sides.setPosition(sf::Vector2f(-260,0));
+        sides.setSize(sf::Vector2f(200,3000));
+        sides.setOrigin(sf::Vector2f(sides.getSize().x / 2, sides.getSize().y / 2));
+        sides.setScale(1, 1);
+        sides.setFillColor(sf::Color(25,25,25));
+        window.draw(sides);
+
+        sides.setPosition(sf::Vector2f(1639, 0));
+        sides.setSize(sf::Vector2f(200, 3000));
+        sides.setOrigin(sf::Vector2f(sides.getSize().x / 2, sides.getSize().y / 2));
+        sides.setScale(1, 1);
+        sides.setFillColor(sf::Color(25, 25, 25));
+        window.draw(sides);
+
+
+
+        //Raycast myRay(sf::Vector2f(500, 500), sf::Vector2f(1, 1));
+        /*
+        if (sf::Keyboard().isKeyPressed(sf::Keyboard().P)) {
+            myRay.angle = 78 * (3.1415 / 180);
+        }
+        else {
+            myRay.angle = 45 * (3.1415 / 180);
+        }   
+        */
+        for (size_t i = 0; i < walls.size(); i++)
+        {
+            //walls[i].draw(&window);
+        }
+
+        //myRay.mousepos = sf::Vector2f(mymousepos);
+        //myRay.position = sf::Vector2f(400, 150);
+        //myRay.directionVec = sf::Vector2f(400, 180);
+        //myRay.draw(&window);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
         //Display ImGui last
         ImGui::SFML::Render(window);

@@ -92,5 +92,8 @@
     <ClInclude Include="textureObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Raycast.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

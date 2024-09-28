@@ -177,6 +177,7 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="OpenFileExplorer.h" />
+    <ClInclude Include="Raycast.h" />
     <ClInclude Include="SaveLoadScene.h" />
     <ClInclude Include="textureObject.h" />
   </ItemGroup>

@@ -32,9 +32,8 @@ void ObjectListUpdate(vector<GameObject>& worldObjects);
 
 int main() {
   //Setup
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Game");
+    //Moved window setup to GameObject.h
     window.setFramerateLimit(144);
-
     srand(time(NULL)); //Set random seed
     
     /*
@@ -117,7 +116,7 @@ int main() {
     sf::Vector2i midMouseInit = sf::Vector2i(0, 0);
     bool selectingNewImage = false;
     bool selectingNewComponent = false;
-    string startingScene = "TestSave.scene";///////////////////////////////////////////////////////////////////////Change this to the starting scene FilePath
+    string startingScene = "Level1.scene";///////////////////////////////////////////////////////////////////////Change this to the starting scene FilePath
     LoadScene(startingScene, WorldObjects);
     currentScene = startingScene;
     bool saveAsWindow = false;
@@ -290,6 +289,12 @@ int main() {
         }
 
 
+        //Update ImGUI
+        ImGui::SFML::Update(window, deltaClock.restart());
+        bool mouseNotOverImGui = !ImGui::GetIO().WantCaptureMouse;
+
+
+
         //Where is the camera
         //cout << "Cam Offset: " << Camera.getCenter().x << endl;
         cameraOffset = sf::Vector2f(Camera.getCenter().x, Camera.getCenter().y);
@@ -300,7 +305,7 @@ int main() {
             ImGui::SFML::ProcessEvent(event);
             if (event.type == sf::Event::Closed) {
                 window.close();
-            }else if (event.type == sf::Event::MouseWheelScrolled) {  //Scroll wheel changing the layer
+            }else if (event.type == sf::Event::MouseWheelScrolled && mouseNotOverImGui) {  //Scroll wheel changing the layer
                 if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
                     
                     if (event.mouseWheelScroll.delta > 0) {
@@ -317,8 +322,7 @@ int main() {
                 break;
             }
         }
-        //Update ImGUI
-        ImGui::SFML::Update(window, deltaClock.restart());
+
 
 
         ///////FPS   From imanifacier
@@ -342,7 +346,8 @@ int main() {
 
 
         mouseCollision.Transform.setPosition(sf::Mouse::getPosition(window).x + cameraOffset.x - Camera.getSize().x/2, sf::Mouse::getPosition(window).y + cameraOffset.y - Camera.getSize().y/2);
-        if (editor) {
+        
+        if (editor && window.hasFocus() && mouseNotOverImGui) {
             int tempobjectcounter = -1;
             if (objectSelected == false) {
                 for (size_t i = 0; i < WorldObjects.size(); i++)
@@ -508,6 +513,8 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::V)) {
             //WorldObjects[0].Transform.setScale(WorldObjects[0].Transform.getScale().x - 0.01, WorldObjects[0].Transform.getScale().y - 0.01);
         }
+
+        
 
 
         //CAMERA MOVEMENT TEST
@@ -977,6 +984,27 @@ int main() {
                     ImGui::PopItemWidth();
 
                 }
+                if (ImGui::Button("Duplicate Object")) {
+                    //dup object
+                    GameObject mynewobj(0);
+                    mynewobj.name = selectedObject->name;
+                    //mynewobj.textureIndex = 0;
+                    mynewobj.renderLayer = mouseLayer;
+                    mynewobj.myTexture = selectedObject->myTexture;
+                    mynewobj.physicsLayer = selectedObject->physicsLayer;
+                    mynewobj.numInWorldObjects = WorldObjects.size();
+                    mynewobj.scale = selectedObject->scale;
+                    mynewobj.Transform.setScale(selectedObject->scale);
+                    mynewobj.position = Camera.getCenter();
+                    mynewobj.Transform.setPosition(Camera.getCenter());
+                    mynewobj.worldObjects = &WorldObjects;
+                    mynewobj.textureIndex = selectedObject->textureIndex;
+                    WorldObjects.push_back(mynewobj);
+                    WorldObjects[mynewobj.numInWorldObjects].Setup();
+                    ObjectListUpdate(WorldObjects);
+                    selectedObject = &WorldObjects.back();
+                    objectSelected = true;
+                }
                 /*
         float yVelocity = 0;
         float yAcceleration = -9.81;
@@ -1187,7 +1215,7 @@ int main() {
 
         //Change this number for how many layers you will have. (0 is a render layer)
         //This will render the sprites by layer, then in order from earliest in the vector to the latest
-        int layerCount = 3;
+        int layerCount = 7;
 
         for (size_t l = layerCount; l-- > 0;)
         {
@@ -1198,6 +1226,13 @@ int main() {
                     //Must render object with the camera position in mind.
                     //GameObject renderingObject = WorldObjects[i];
                     //renderingObject.Transform.move(camOffset);
+
+                    /*
+                    if (WorldObjects[i].renderLayer == mouseLayer) {
+
+                        WorldObjects[i].Transform.setColor();
+                    }
+                    */
                     window.draw(WorldObjects[i].Transform);
                 }
 

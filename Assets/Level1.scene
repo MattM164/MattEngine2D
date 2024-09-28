@@ -1,0 +1,80 @@
+Assets\Level1.scene
+77
+Ground*700*950*5*5*0* *0*0*6*0*
+sky*3*85*10*10*0* *6*1*3*0*
+Ground2*1150*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*250*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*247*880*5*5*0*DefaultSprite.png*1*1*7*0*
+New Object*1036*881*5*5*0*DefaultSprite.png*1*1*7*0*
+New Object*930*877*5*5*0*DefaultSprite.png*1*1*8*0*
+New Object*277*886*5*5*0*DefaultSprite.png*1*1*8*0*
+New Object*629*881*5*5*0*DefaultSprite.png*1*1*9*0*
+Underground1*270*2944*20*20*0*DefaultSprite.png*1*0*10*0*
+moreground*1600*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*2049*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*1933*875*5*5*0*DefaultSprite.png*1*1*8*0*
+New Object*1871.72*872*6*6*0*DefaultSprite.png*1*1*7*0*
+Plat1*1878*607*4*0.75*0*DefaultSprite.png*0*0*1*0*
+Player*140.18*847.036*4*4*0*DefaultSprite.png*0*0*15*5*CameraControl SimplePhysics SimpleSpriteCollision PlayerMoveTest PlayerAnim 
+Plat2*2501*327*4*0.75*0*DefaultSprite.png*0*0*1*0*
+New Object*3250*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*3926*1968*9*10*0*DefaultSprite.png*1*0*10*0*
+New Object*3700*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*4150*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*4600*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*4790*1178*5*5*90*DefaultSprite.png*0*0*6*0*
+New Object*2237*1178*5*5*90*DefaultSprite.png*0*0*6*0*
+New Object*3062*1183*5*5*270*DefaultSprite.png*0*0*6*0*
+New Object*3622*888*4*4*0*DefaultSprite.png*1*1*7*0*
+New Object*3011*885*5*5*0*DefaultSprite.png*1*1*9*0*
+New Object*4337*871*-6*6*0*DefaultSprite.png*1*1*7*0*
+sky*7995*444*10*10*0* *6*1*3*0*
+New Object*3285*864*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3383*866*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3482*866*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3582*866*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3682*867*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3948.28*881*5*5*0*DefaultSprite.png*1*1*9*0*
+New Object*4240.28*881*5*5*0*DefaultSprite.png*1*1*9*0*
+New Object*3194.28*889*5*5*0*DefaultSprite.png*1*1*8*0*
+New Object*3977.28*869*5*5*0*DefaultSprite.png*1*1*8*0*
+New Object*3684*767*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3586*767*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3488*767*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3389*767*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3684*667*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3585*669*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3486*670*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3584*571*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3683*571*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*3683*471*5*5*0*DefaultSprite.png*2*0*11*0*
+RobotEnemy*1986.66*519*5*5*0*DefaultSprite.png*1*0*12*2*Goomba SimpleSpriteCollision 
+New Object*327*137*8*8*0*DefaultSprite.png*5*1*13*2*ChangeSpeed Parallax1 
+New Object*1054*302*7*7*0*DefaultSprite.png*5*1*13*1*Parallax1 
+New Object*2648*1332*12*12*0*DefaultSprite.png*2*2*14*0*
+New Object*3738*384*5*5*0*DefaultSprite.png*1*1*8*0*
+New Object*1871*144*-7*7*0*DefaultSprite.png*5*1*13*1*Parallax1 
+mysecondGoomba*2434*238*5*5*0*DefaultSprite.png*1*0*12*2*Goomba SimpleSpriteCollision 
+platwall*1654*516*0.2*1*0*DefaultSprite.png*1*7*2*0*
+platwall*2095.66*519*0.2*1*0*DefaultSprite.png*1*7*2*0*
+platwall*2276.47*236*0.2*1*0*DefaultSprite.png*1*7*2*0*
+platwall*2725.47*234*0.2*1*0*DefaultSprite.png*1*7*2*0*
+New Object*-200*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*-650*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*-1100*950*5*5*0*DefaultSprite.png*0*0*6*0*
+New Object*-394*13*1*3*0*DefaultSprite.png*6*0*3*0*
+New Object*7061*1745*6*6*0*DefaultSprite.png*1*2*16*0*
+New Object*3780.53*864*5*5*0*DefaultSprite.png*2*0*11*0*
+New Object*546*705*20*20*0*DefaultSprite.png*4*4*17*1*Parallax1 
+New Object*1437.57*815*20*20*0*DefaultSprite.png*4*4*17*1*Parallax1 
+New Object*4228.57*677*20*20*0*DefaultSprite.png*4*4*17*1*Parallax1 
+New Object*-362.803*800*20*20*0*DefaultSprite.png*4*4*17*1*Parallax1 
+New Object*-353.574*882*5*5*0*DefaultSprite.png*1*1*7*0*
+New Object*2645.72*1324*0.7*0.7*0*DefaultSprite.png*3*0*3*2*DeathWall SimpleSpriteCollision 
+New Object*4110*155*-7*7*0*DefaultSprite.png*5*1*13*1*Parallax1 
+mysecondGoomba*4066*861*5*5*0*DefaultSprite.png*1*0*12*2*Goomba SimpleSpriteCollision 
+platwall*3822*863*0.2*1*0*DefaultSprite.png*1*7*2*0*
+platwall*4836*862*0.2*1*0*DefaultSprite.png*1*7*2*0*
+Plat2*5345.37*721*4*0.75*0*DefaultSprite.png*0*0*1*0*
+whatever*2620.98*773*15*3*0*DefaultSprite.png*1*0*11*1*SimpleSpriteCollision 
+21%Assets\ball.png%Assets\MetalGround.png%Assets\DefaultSprite.png%Assets\skycolor.png%Assets\fence.png%Assets\DemoPicture.PNG%Assets\Grass.png%Assets\GroundRock.png%Assets\YellowFlower.png%Assets\YellowFlower2.png%Assets\DirtBig.png%Assets\YellowBlock.png%Assets\enemy.png%Assets\Cloud1.png%Assets\gradient.png%Assets\ChickenDinner.png%Assets\Flag.png%Assets\hill.png%Assets\%Assets\goombaDead.png%Assets\%

@@ -205,7 +205,7 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 				//getline(inputFile, sceneData, '*');
 			}
 
-
+			
 			cout << "name: " << loadedGameObject.name << endl;
 			cout << "x: " << loadedGameObject.position.x << endl;
 			cout << "y: " << loadedGameObject.position.y << endl;
@@ -214,7 +214,7 @@ void LoadScene(string filename, vector<GameObject> &gameObjects) {
 			cout << "tex name: " << loadedGameObject.myTexture << endl;
 			objectnum++;
 			if (getline(inputFile, sceneData, '\n')) {
-				cout << "got that last backslash n" << endl;
+				//cout << "got that last backslash n" << endl;
 			}
 			//getline(inputFile, sceneData, '\n');
 			

@@ -25,7 +25,7 @@
 using namespace std;
 
 
-bool editor = true;  //Change this to false when you want to build release
+bool editor = false;  //Change this to false when you want to build release
 
 //Global Variables
 vector<string> objectListStrings; //Used for Editor UI
@@ -122,6 +122,9 @@ int main() {
     }
     */
     
+    //Bool for if we want to show 2d representation of the game
+    bool show2D = false;
+
     wall wallout;
     wallout.p1 = sf::Vector2f(0, 0);
     wallout.p2 = sf::Vector2f(1200, 0);
@@ -576,11 +579,13 @@ int main() {
         }
         /////////////////////////
 
-        
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            //WorldObjects[0].xAcceleration = 5;
+        //Swap to 2d view
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            show2D = !show2D;
 
         }
+
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
             //WorldObjects[0].Transform.move(2.5, 0);
            //WorldObjects[0].xAcceleration = -5;
@@ -1423,9 +1428,9 @@ int main() {
                 sf::Vector2f interceptPoint = myRay.checkCollision(myRay.origin, myRay.endPoint, walls[k].p1, walls[k].p2);
                 myRay.endPoint = interceptPoint;
             }
-
+            if (!show2D) {
                 float dist = sqrt(std::pow((myRay.endPoint.x - WorldObjects[0].Transform.getPosition().x), 2) + std::pow((myRay.endPoint.y - WorldObjects[0].Transform.getPosition().y), 2));
-                
+
                 float testangle = atan2(i, 90);
 
 
@@ -1440,16 +1445,19 @@ int main() {
 
                 //dist * Cos(Ray Angle - Player Angle)
                 sf::RectangleShape shape;// (sf::Vector2f(i + 5, 500) );
-                
+
                 shape.setPosition(sf::Vector2f(i * 8.5 - 155, 600));
-                shape.setSize(sf::Vector2f(8.5,200*(1000/fixeddist)));
+                shape.setSize(sf::Vector2f(8.5, 200 * (1000 / fixeddist)));
                 shape.setOrigin(sf::Vector2f(shape.getSize().x / 2, shape.getSize().y / 2));
-                shape.setScale(1,1);
+                shape.setScale(1, 1);
                 shape.setFillColor(sf::Color(distfixc, distfixc, distfixc));
                 window.draw(shape);
+        }
             
-
-            //myRay.draw(&window);
+                if (show2D) {
+                    myRay.draw(&window);
+                }
+            
 
            
         }
@@ -1481,9 +1489,11 @@ int main() {
             myRay.angle = 45 * (3.1415 / 180);
         }   
         */
-        for (size_t i = 0; i < walls.size(); i++)
-        {
-            //walls[i].draw(&window);
+        if (show2D) {
+            for (size_t i = 0; i < walls.size(); i++)
+            {
+                walls[i].draw(&window);
+            }
         }
 
         //myRay.mousepos = sf::Vector2f(mymousepos);

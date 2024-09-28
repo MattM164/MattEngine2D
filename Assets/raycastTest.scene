@@ -1,6 +1,6 @@
 Assets\raycastTest.scene
 3
-Player*296*501*0.05*0.05*298.46*DefaultSprite.png*1*0*0*1*Movement 
+Player*296*501*0.05*0.05*309.9*DefaultSprite.png*1*0*0*1*Movement 
 top*893*-1857*80*50*0*DefaultSprite.png*1*0*1*0*
 floor*787*2136*30*30*0*DefaultSprite.png*1*0*1*0*
 6%Assets\ball.png%Assets\MetalGround.png%Assets\DefaultSprite.png%Assets\skycolor.png%Assets\fence.png%Assets\DemoPicture.PNG%
